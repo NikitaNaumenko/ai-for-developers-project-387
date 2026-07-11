@@ -1,0 +1,25 @@
+services:
+  - type: web
+    runtime: docker
+    name: calendar-api
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/event-types
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: calendar-db
+          property: connectionString
+
+databases:
+  - name: calendar-db
+    plan: free
+    postgresMajorVersion: "17"
+    databaseName: calendar
+    user: calendar
+    ipAllowList: []
