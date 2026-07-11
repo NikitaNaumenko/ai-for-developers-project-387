@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -35,6 +36,14 @@ func (s *MemoryStore) CreateEventType(_ context.Context, arg db.CreateEventTypeP
 	id := uuidFromPg(arg.ID)
 	if _, exists := s.eventTypes[id]; exists {
 		return db.EventType{}, pgError("23505")
+	}
+
+	title := normalizeEventTypeField(arg.Title)
+	description := normalizeEventTypeField(arg.Description)
+	for _, existing := range s.eventTypes {
+		if normalizeEventTypeField(existing.Title) == title && normalizeEventTypeField(existing.Description) == description {
+			return db.EventType{}, pgError("23505")
+		}
 	}
 
 	now := timestamptz(s.now())
@@ -206,4 +215,8 @@ func timestamptz(value time.Time) pgtype.Timestamptz {
 
 func pgError(code string) error {
 	return &pgconn.PgError{Code: code}
+}
+
+func normalizeEventTypeField(value string) string {
+	return strings.ToLower(strings.TrimSpace(value))
 }
