@@ -44,6 +44,7 @@ import {
   EventType,
   calendarApi,
 } from './api/client';
+import { uuidv7 } from './utils/uuid';
 
 type Page = 'booking' | 'event-types' | 'bookings';
 
@@ -482,7 +483,7 @@ function EventTypesPage({
     event.preventDefault();
 
     const payload: CreateEventTypeRequest = {
-      id: crypto.randomUUID(),
+      id: uuidv7(),
       title: form.title.trim(),
       description: form.description.trim(),
       durationMinutes: form.durationMinutes,
