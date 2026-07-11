@@ -54,6 +54,31 @@ func TestMemoryStoreCreatesBookingAndRejectsOverlap(t *testing.T) {
 	}
 }
 
+func TestMemoryStoreRejectsDuplicateEventType(t *testing.T) {
+	ctx := context.Background()
+	store := NewMemoryStore()
+
+	_, err := store.CreateEventType(ctx, db.CreateEventTypeParams{
+		ID:              uuidParam(uuid.New()),
+		Title:           "Intro",
+		Description:     "Intro call",
+		DurationMinutes: 30,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = store.CreateEventType(ctx, db.CreateEventTypeParams{
+		ID:              uuidParam(uuid.New()),
+		Title:           "  intro  ",
+		Description:     "  INTRO CALL  ",
+		DurationMinutes: 45,
+	})
+	if pgErrorCode(err) != "23505" {
+		t.Fatalf("expected duplicate error 23505, got %v", err)
+	}
+}
+
 func pgErrorCode(err error) string {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
