@@ -1,0 +1,1 @@
+DROP INDEX event_types_title_description_idx;
