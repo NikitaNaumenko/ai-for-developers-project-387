@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -35,6 +36,15 @@ func (s *MemoryStore) CreateEventType(_ context.Context, arg db.CreateEventTypeP
 	id := uuidFromPg(arg.ID)
 	if _, exists := s.eventTypes[id]; exists {
 		return db.EventType{}, pgError("23505")
+	}
+
+	normalizedTitle := normalizeEventTypeField(arg.Title)
+	normalizedDescription := normalizeEventTypeField(arg.Description)
+	for _, existing := range s.eventTypes {
+		if normalizeEventTypeField(existing.Title) == normalizedTitle &&
+			normalizeEventTypeField(existing.Description) == normalizedDescription {
+			return db.EventType{}, pgError("23505")
+		}
 	}
 
 	now := timestamptz(s.now())
@@ -187,6 +197,10 @@ func sortUpcomingBookingRows(bookings []db.ListUpcomingBookingsRow) {
 
 func overlaps(aStartsAt time.Time, aEndsAt time.Time, bStartsAt time.Time, bEndsAt time.Time) bool {
 	return aStartsAt.Before(bEndsAt) && aEndsAt.After(bStartsAt)
+}
+
+func normalizeEventTypeField(value string) string {
+	return strings.ToLower(strings.TrimSpace(value))
 }
 
 func uuidParam(id uuid.UUID) pgtype.UUID {
