@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -35,6 +36,15 @@ func (s *MemoryStore) CreateEventType(_ context.Context, arg db.CreateEventTypeP
 	id := uuidFromPg(arg.ID)
 	if _, exists := s.eventTypes[id]; exists {
 		return db.EventType{}, pgError("23505")
+	}
+
+	title := strings.ToLower(strings.TrimSpace(arg.Title))
+	description := strings.ToLower(strings.TrimSpace(arg.Description))
+	for _, existing := range s.eventTypes {
+		if strings.ToLower(strings.TrimSpace(existing.Title)) == title &&
+			strings.ToLower(strings.TrimSpace(existing.Description)) == description {
+			return db.EventType{}, pgError("23505")
+		}
 	}
 
 	now := timestamptz(s.now())
