@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -36,6 +37,9 @@ func (s *MemoryStore) CreateEventType(_ context.Context, arg db.CreateEventTypeP
 	if _, exists := s.eventTypes[id]; exists {
 		return db.EventType{}, pgError("23505")
 	}
+	if s.hasDuplicateEventType(arg.Title, arg.Description) {
+		return db.EventType{}, pgError("23505")
+	}
 
 	now := timestamptz(s.now())
 	eventType := db.EventType{
@@ -48,6 +52,22 @@ func (s *MemoryStore) CreateEventType(_ context.Context, arg db.CreateEventTypeP
 	}
 	s.eventTypes[id] = eventType
 	return eventType, nil
+}
+
+func (s *MemoryStore) hasDuplicateEventType(title, description string) bool {
+	normalizedTitle := normalizeEventTypeField(title)
+	normalizedDescription := normalizeEventTypeField(description)
+	for _, eventType := range s.eventTypes {
+		if normalizeEventTypeField(eventType.Title) == normalizedTitle &&
+			normalizeEventTypeField(eventType.Description) == normalizedDescription {
+			return true
+		}
+	}
+	return false
+}
+
+func normalizeEventTypeField(value string) string {
+	return strings.ToLower(strings.TrimSpace(value))
 }
 
 func (s *MemoryStore) GetEventType(_ context.Context, id pgtype.UUID) (db.EventType, error) {
