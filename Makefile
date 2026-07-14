@@ -3,7 +3,7 @@ export
 
 APP_NAME := calendar-api
 
-.PHONY: tools generate test run build frontend-install frontend-dev frontend-build frontend-e2e typespec-install typespec-build typespec-check mock-api
+.PHONY: tools generate test run build frontend-install frontend-dev frontend-build frontend-e2e typespec-install typespec-build typespec-check mock-api lighthouse
 
 tools:
 	go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.7.0
@@ -45,3 +45,6 @@ typespec-check:
 
 mock-api:
 	npm run mock --prefix api/typespec
+
+lighthouse:
+	./scripts/lighthouse.sh

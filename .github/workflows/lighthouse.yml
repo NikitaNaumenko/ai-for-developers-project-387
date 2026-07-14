@@ -1,0 +1,53 @@
+name: lighthouse
+
+on:
+  schedule:
+    # Nightly at 03:00 UTC, so the report is waiting on the Actions tab in the morning.
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'URL to audit (defaults to the LIGHTHOUSE_URL repository variable)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Resolve target URL
+        id: target
+        env:
+          INPUT_URL: ${{ inputs.url }}
+          VAR_URL: ${{ vars.LIGHTHOUSE_URL }}
+        run: |
+          url="${INPUT_URL:-$VAR_URL}"
+          if [ -z "$url" ]; then
+            echo "::error::No target URL. Set the LIGHTHOUSE_URL repository variable (Settings -> Secrets and variables -> Actions -> Variables), or pass a url input when running this workflow manually."
+            exit 1
+          fi
+          echo "url=$url" >>"$GITHUB_OUTPUT"
+
+      - name: Run Lighthouse
+        run: make lighthouse
+        env:
+          LIGHTHOUSE_URL: ${{ steps.target.outputs.url }}
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report-${{ github.run_number }}
+          path: .lighthouse/
+          retention-days: 30
+          if-no-files-found: warn

@@ -14,6 +14,7 @@ This repository contains a Go calendar API, PostgreSQL schema, and Vite React fr
 - `docker compose up -d postgres` starts the local PostgreSQL service.
 - `make frontend-install`, `make frontend-dev`, and `make frontend-build` install, run, and build the Vite frontend.
 - `make typespec-install`, `make typespec-build`, `make typespec-check`, and `make mock-api` manage the TypeSpec contract and Prism mock API.
+- `make lighthouse LIGHTHOUSE_URL=https://<host>` audits a deployed instance with the Lighthouse CLI and writes HTML and JSON reports to `.lighthouse/`. The same script runs nightly in the `lighthouse` workflow, which reads the URL from the `LIGHTHOUSE_URL` repository variable and can also be triggered by hand.
 
 ## Coding Style & Naming Conventions
 

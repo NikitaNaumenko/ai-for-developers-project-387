@@ -4,6 +4,7 @@
 /tmp/
 /.cache/
 /coverage.out
+/.lighthouse/
 /frontend/node_modules/
 /frontend/dist/
 /api/typespec/node_modules/
