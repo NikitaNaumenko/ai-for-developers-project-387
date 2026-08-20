@@ -1,9 +1,9 @@
 name: lighthouse
 
 on:
-  schedule:
-    # Nightly at 03:00 UTC, so the report is waiting on the Actions tab in the morning.
-    - cron: '0 3 * * *'
+  # schedule:
+  #   # Nightly at 03:00 UTC, so the report is waiting on the Actions tab in the morning.
+  #   - cron: '0 3 * * *'
   workflow_dispatch:
     inputs:
       url:
